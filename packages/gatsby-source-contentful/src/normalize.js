@@ -592,10 +592,6 @@ export const createAssetNodes = ({
       parent: null,
       children: [],
       file,
-      title: assetItem.fields.title ? getField(assetItem.fields.title) : ``,
-      description: assetItem.fields.description
-        ? getField(assetItem.fields.description)
-        : ``,
       internal: {
         type: `${makeTypeName(`Asset`)}`,
         // The content of an asset is guaranteed to be updated if and only if the .sys.updatedAt field changed
@@ -613,12 +609,19 @@ export const createAssetNodes = ({
         publishedAt: assetItem.sys.updatedAt,
         publishedVersion: assetItem.sys.revision,
       },
-      url: `https:${file.url}`,
       placeholderUrl: `https:${file.url}?w=%width%&h=%height%`,
       mimeType: file.contentType,
       filename: file.fileName,
-      width: file.details?.image?.width,
-      height: file.details?.image?.height,
+      title: assetItem.fields.title ? getField(assetItem.fields.title) : ``,
+      description: assetItem.fields.description
+        ? getField(assetItem.fields.description)
+        : ``,
+      contentType: file.contentType,
+      fileName: file.fileName,
+      url: `https:${file.url}`,
+      size: file.details.size,
+      width: file.details?.image?.width || null,
+      height: file.details?.image?.height || null,
     }
 
     // Link tags

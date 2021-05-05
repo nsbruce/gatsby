@@ -318,6 +318,8 @@ describe(`gatsby-node`, () => {
           })
         )
 
+        const file = getFieldValue(asset.fields.file, locale, defaultLocale)
+
         // check if asset exists
         expect(getNode(assetId)).toMatchObject({
           title: getFieldValue(asset.fields.title, locale, defaultLocale),
@@ -326,7 +328,12 @@ describe(`gatsby-node`, () => {
             locale,
             defaultLocale
           ),
-          file: getFieldValue(asset.fields.file, locale, defaultLocale),
+          contentType: file.contentType,
+          fileName: file.fileName,
+          url: file.url,
+          size: file.details.size,
+          width: file.details?.image?.width || null,
+          height: file.details?.image?.height || null,
         })
       })
     })
