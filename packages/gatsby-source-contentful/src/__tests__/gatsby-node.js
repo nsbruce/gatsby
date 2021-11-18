@@ -11,7 +11,6 @@ import { makeId } from "../normalize"
 
 import startersBlogFixture from "../__fixtures__/starter-blog-data"
 import richTextFixture from "../__fixtures__/rich-text-data"
-import restrictedContentTypeFixture from "../__fixtures__/restricted-content-type"
 
 jest.mock(`../fetch`)
 jest.mock(`gatsby-core-utils`, () => {
