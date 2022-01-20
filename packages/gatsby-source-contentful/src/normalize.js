@@ -604,8 +604,11 @@ export const createAssetNodes = ({
         publishedVersion: assetItem.sys.revision,
       },
       placeholderUrl: `https:${file.url}?w=%width%&h=%height%`,
-      mimeType: file.contentType,
-      filename: file.fileName,
+      metadata: {
+        tags___NODE: assetItem.metadata.tags.map(tag =>
+          createNodeId(`ContentfulTag__${space.sys.id}__${tag.sys.id}`)
+        ),
+      },
       title: assetItem.fields.title ? getField(assetItem.fields.title) : ``,
       description: assetItem.fields.description
         ? getField(assetItem.fields.description)
@@ -616,15 +619,6 @@ export const createAssetNodes = ({
       size: file.details.size,
       width: file.details?.image?.width || null,
       height: file.details?.image?.height || null,
-    }
-
-    // Link tags
-    if (pluginConfig.get(`enableTags`)) {
-      assetNode.metadata = {
-        tags___NODE: assetItem.metadata.tags.map(tag =>
-          createNodeId(`ContentfulTag__${space.sys.id}__${tag.sys.id}`)
-        ),
-      }
     }
 
     // if the node hasn't changed, createNode may return `undefined` instead of a Promise on some versions of Gatsby
