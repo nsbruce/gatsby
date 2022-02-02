@@ -10,7 +10,6 @@ import { fetchContent, fetchContentTypes } from "../fetch"
 import { makeId } from "../normalize"
 
 import startersBlogFixture from "../__fixtures__/starter-blog-data"
-import richTextFixture from "../__fixtures__/rich-text-data"
 
 jest.mock(`../fetch`)
 jest.mock(`gatsby-core-utils`, () => {
@@ -84,21 +83,33 @@ describe(`gatsby-node`, () => {
     }),
     touchNode: jest.fn(),
   }
+
+  const schemaCustomizationTypes = []
   const schema = {
-    buildObjectType: jest.fn(() => {
-      return {
-        config: {
-          interfaces: [],
-        },
-      }
+    buildObjectType: jest.fn(config => {
+      schemaCustomizationTypes.push({
+        typeOrTypeDef: { config },
+        plugin: { name: `gatsby-source-contentful` },
+      })
     }),
-    buildInterfaceType: jest.fn(),
+    buildInterfaceType: jest.fn(config => {
+      schemaCustomizationTypes.push({
+        typeOrTypeDef: { config },
+        plugin: { name: `gatsby-source-contentful` },
+      })
+    }),
   }
+
   const store = {
     getState: jest.fn(() => {
-      return { program: { directory: process.cwd() }, status: {} }
+      return {
+        program: { directory: process.cwd() },
+        status: {},
+        schemaCustomization: { types: schemaCustomizationTypes },
+      }
     }),
   }
+
   const cache = createMockCache()
   const getCache = jest.fn(() => cache)
   const reporter = {
@@ -126,7 +137,7 @@ describe(`gatsby-node`, () => {
     pluginOptions = defaultPluginOptions
   ) {
     await createSchemaCustomization(
-      { schema, actions, reporter, cache, store },
+      { schema, actions, reporter, cache },
       pluginOptions
     )
 
@@ -375,6 +386,7 @@ describe(`gatsby-node`, () => {
     cache.set.mockClear()
     reporter.info.mockClear()
     reporter.panic.mockClear()
+    schemaCustomizationTypes.length = 0
   })
 
   let hasImported = false
@@ -839,7 +851,7 @@ describe(`gatsby-node`, () => {
 
     expect(actions.createNode).toHaveBeenCalledTimes(52)
     expect(actions.deleteNode).toHaveBeenCalledTimes(2)
-    expect(actions.touchNode).toHaveBeenCalledTimes(74)
+    expect(actions.touchNode).toHaveBeenCalledTimes(72)
     expect(reporter.info.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -925,7 +937,7 @@ describe(`gatsby-node`, () => {
 
     expect(actions.createNode).toHaveBeenCalledTimes(54)
     expect(actions.deleteNode).toHaveBeenCalledTimes(2)
-    expect(actions.touchNode).toHaveBeenCalledTimes(74)
+    expect(actions.touchNode).toHaveBeenCalledTimes(72)
     expect(reporter.info.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -956,26 +968,6 @@ describe(`gatsby-node`, () => {
     `)
   })
 
-  it(`stores rich text as JSON`, async () => {
-    // @ts-ignore
-    fetchContent.mockImplementationOnce(richTextFixture.initialSync)
-    // @ts-ignore
-    fetchContentTypes.mockImplementationOnce(richTextFixture.contentTypeItems)
-
-    // initial sync
-    await simulateGatsbyBuild()
-
-    const initNodes = getNodes()
-
-    const homeNodes = initNodes.filter(
-      ({ sys: { id } }) => id === `6KpLS2NZyB3KAvDzWf4Ukh`
-    )
-    expect(homeNodes).toHaveLength(2)
-    homeNodes.forEach(homeNode => {
-      expect(homeNode.content).toMatchSnapshot()
-    })
-  })
-
   it(`panics when localeFilter reduces locale list to 0`, async () => {
     // @ts-ignore
     fetchContent.mockImplementationOnce(startersBlogFixture.initialSync)
@@ -992,56 +984,6 @@ describe(`gatsby-node`, () => {
           sourceMessage: `Please check if your localeFilter is configured properly. Locales '${locales.join(
             `,`
           )}' were found but were filtered down to none.`,
-        },
-      })
-    )
-  })
-
-  it(`panics when response contains restricted content types`, async () => {
-    // @ts-ignore
-    fetchContent.mockImplementationOnce(
-      restrictedContentTypeFixture.initialSync
-    )
-    // @ts-ignore
-    fetchContentTypes.mockImplementationOnce(
-      restrictedContentTypeFixture.contentTypeItems
-    )
-
-    await simulateGatsbyBuild()
-
-    expect(reporter.panic).toBeCalledWith(
-      expect.objectContaining({
-        context: {
-          sourceMessage: `Restricted ContentType name found. The name "reference" is not allowed.`,
-        },
-      })
-    )
-  })
-
-  it(`panics when response contains content type Tag while enableTags is true`, async () => {
-    // @ts-ignore
-    fetchContent.mockImplementationOnce(
-      restrictedContentTypeFixture.initialSync
-    )
-    const contentTypesWithTag = () => {
-      const manipulatedContentTypeItems =
-        restrictedContentTypeFixture.contentTypeItems()
-      manipulatedContentTypeItems[0].name = `Tag`
-      return manipulatedContentTypeItems
-    }
-    // @ts-ignore
-    fetchContentTypes.mockImplementationOnce(contentTypesWithTag)
-
-    await simulateGatsbyBuild({
-      spaceId: `mocked`,
-      enableTags: true,
-      useNameForId: true,
-    })
-
-    expect(reporter.panic).toBeCalledWith(
-      expect.objectContaining({
-        context: {
-          sourceMessage: `Restricted ContentType name found. The name "tag" is not allowed.`,
         },
       })
     )

@@ -308,7 +308,7 @@ export const createNodesForContentType = ({
     displayField: contentTypeItem.displayField,
     description: contentTypeItem.description,
     internal: {
-      type: `${makeTypeName(`ContentType`)}`,
+      type: `ContentfulContentType`,
       contentDigest: contentTypeItem.sys.updatedAt,
     },
     // https://www.contentful.com/developers/docs/references/content-delivery-api/#/introduction/common-resource-attributes
@@ -565,7 +565,6 @@ export const createAssetNodes = ({
   defaultLocale,
   locales,
   space,
-  pluginConfig,
 }) => {
   const createNodePromises = []
   locales.forEach(locale => {
