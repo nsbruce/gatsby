@@ -91,6 +91,7 @@ describe(`gatsby-node`, () => {
         typeOrTypeDef: { config },
         plugin: { name: `gatsby-source-contentful` },
       })
+      return { config }
     }),
     buildInterfaceType: jest.fn(config => {
       schemaCustomizationTypes.push({
@@ -339,7 +340,7 @@ describe(`gatsby-node`, () => {
           ),
           contentType: file.contentType,
           fileName: file.fileName,
-          url: file.url,
+          url: `https:` + file.url,
           size: file.details.size,
           width: file.details?.image?.width || null,
           height: file.details?.image?.height || null,

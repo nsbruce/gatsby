@@ -45,7 +45,7 @@ export async function createSchemaCustomization(
   }
 
   // Generate schemas based on Contentful content model
-  generateSchema({
+  return generateSchema({
     createTypes,
     schema,
     pluginConfig,
