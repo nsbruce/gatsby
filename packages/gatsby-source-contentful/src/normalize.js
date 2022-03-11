@@ -615,7 +615,7 @@ export const createAssetNodes = ({
       contentType: file.contentType,
       fileName: file.fileName,
       url: `https:${file.url}`,
-      size: file.details.size,
+      size: file.details?.size || null,
       width: file.details?.image?.width || null,
       height: file.details?.image?.height || null,
     }
