@@ -618,6 +618,9 @@ export const createAssetNodes = ({
       size: file.details?.size || null,
       width: file.details?.image?.width || null,
       height: file.details?.image?.height || null,
+      // Satisfy the Gatsby ImageCDN feature
+      mimeType: file.contentType,
+      filename: file.fileName,
     }
 
     // if the node hasn't changed, createNode may return `undefined` instead of a Promise on some versions of Gatsby
