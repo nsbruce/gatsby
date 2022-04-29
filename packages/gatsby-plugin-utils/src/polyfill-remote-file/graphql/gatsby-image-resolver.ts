@@ -236,8 +236,6 @@ export async function gatsbyImageResolver(
 
   actions.addGatsbyImageSourceUrl(source.url)
 
-  // let us publish
-
   return {
     images: result as IGatsbyImageData,
     layout: args.layout,
